@@ -23,8 +23,20 @@
  * ```
  * */
 export function calcTileType(index, boardSize) {
+  const row = Math.floor(index / boardSize); // Номер строки
+  const col = index % boardSize;             // Номер столбца
+
+  if (row === 0 && col === 0) return 'top-left';
+  if (row === 0 && col === boardSize - 1) return 'top-right';
+  if (row === 0) return 'top';
+  if (row === boardSize - 1 && col === 0) return 'bottom-left';
+  if (row === boardSize - 1 && col === boardSize - 1) return 'bottom-right';
+  if (row === boardSize - 1) return 'bottom';
+  if (col === 0) return 'left';
+  if (col === boardSize - 1) return 'right';
+  if (row > 0 && row < boardSize - 1 && col > 0 && col < boardSize - 1) return 'center';
   // TODO: ваш код будет тут
-  return 'center';
+  // return 'center';
 }
 
 export function calcHealthLevel(health) {
