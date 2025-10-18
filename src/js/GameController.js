@@ -1,4 +1,4 @@
-import themes from "./themes";
+import themes from './themes';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -7,7 +7,7 @@ export default class GameController {
   }
 
   init() {
-    const selectedTheme = themes.prairie
+    const selectedTheme = themes.prairie;
     this.gamePlay.drawUi(selectedTheme);
     // TODO: add event listeners to gamePlay events
     // TODO: load saved stated from stateService

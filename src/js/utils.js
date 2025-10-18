@@ -24,7 +24,7 @@
  * */
 export function calcTileType(index, boardSize) {
   const row = Math.floor(index / boardSize); // Номер строки
-  const col = index % boardSize;             // Номер столбца
+  const col = index % boardSize; // Номер столбца
 
   if (row === 0 && col === 0) return 'top-left';
   if (row === 0 && col === boardSize - 1) return 'top-right';
