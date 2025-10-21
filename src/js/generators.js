@@ -7,9 +7,16 @@
  * @returns генератор, который при каждом вызове
  * возвращает новый экземпляр класса персонажа
  *
- */
+ */ import Team from './Team';
+
 export function* characterGenerator(allowedTypes, maxLevel) {
-  // TODO: write logic here
+  while (true) {
+    const randomIndex = Math.floor(Math.random() * allowedTypes.length);
+    const SelectedType = allowedTypes[randomIndex];
+    const randomLevel = Math.floor(Math.random() * maxLevel);
+
+    yield new SelectedType(randomLevel);
+  }
 }
 
 /**
@@ -20,5 +27,12 @@ export function* characterGenerator(allowedTypes, maxLevel) {
  * @returns экземпляр Team, хранящий экземпляры персонажей. Количество персонажей в команде - characterCount
  * */
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
-  // TODO: write logic here
+  const generator = characterGenerator(allowedTypes, maxLevel);
+  const characters = [];
+
+  for (let i = 0; i < characterCount; i++) {
+    characters.push(generator.next().value);
+  }
+
+  return new Team(characters);
 }
