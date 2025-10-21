@@ -1,5 +1,4 @@
-import Character from "../Character";
-
+import Character from '../Character';
 
 class CharacterTest extends Character {
   constructor(level, type = 'test') {
@@ -41,6 +40,6 @@ describe('Инициализация', () => {
 
   test('должен позволять устанавливать защиту в наследнике', () => {
     expect(character.defense).toBe(5);
-  })
+  });
 
 });
