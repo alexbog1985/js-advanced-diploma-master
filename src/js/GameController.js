@@ -1,12 +1,12 @@
 import themes from './themes';
-import PositionedCharacter from "./PositionedCharacter";
-import {generateTeam} from "./generators";
-import Bowman from "./characters/Bowman";
-import Magician from "./characters/Magician";
-import Swordsman from "./characters/Swordsman";
-import Daemon from "./characters/Daemon";
-import Undead from "./characters/Undead";
-import Vampire from "./characters/Vampire";
+import PositionedCharacter from './PositionedCharacter';
+import { generateTeam } from './generators';
+import Bowman from './characters/Bowman';
+import Magician from './characters/Magician';
+import Swordsman from './characters/Swordsman';
+import Daemon from './characters/Daemon';
+import Undead from './characters/Undead';
+import Vampire from './characters/Vampire';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -22,7 +22,7 @@ export default class GameController {
     const selectedTheme = themes.prairie;
     this.gamePlay.drawUi(selectedTheme);
     this.generateTeams();
-    this.redrawAllPositions()
+    this.redrawAllPositions();
     // TODO: add event listeners to gamePlay events
     // TODO: load saved stated from stateService
   }
@@ -44,7 +44,7 @@ export default class GameController {
     });
   }
 
-    generatePositions(columns, count) {
+  generatePositions(columns, count) {
     const allPossiblePositions = [];
 
     for (let row = 0; row < this.boardSize; row++) {
@@ -57,7 +57,7 @@ export default class GameController {
     return shuffled.slice(0, count);
   }
 
-    redrawAllPositions() {
+  redrawAllPositions() {
     this.allPositionedCharacters = [...this.playerTeam, ...this.enemyTeam];
     this.gamePlay.redrawPositions(this.allPositionedCharacters);
   }

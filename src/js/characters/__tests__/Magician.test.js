@@ -1,6 +1,6 @@
 
 import Magician from '../Magician';
-import Character from "../../Character";
+import Character from '../../Character';
 
 describe('Magician class', () => {
   let magician;

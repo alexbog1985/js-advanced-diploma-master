@@ -1,6 +1,6 @@
 
 import Daemon from '../Daemon';
-import Character from "../../Character";
+import Character from '../../Character';
 
 describe('Daemon class', () => {
   let daemon;

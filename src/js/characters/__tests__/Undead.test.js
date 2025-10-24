@@ -1,6 +1,6 @@
 
 import Undead from '../Undead';
-import Character from "../../Character";
+import Character from '../../Character';
 
 describe('Undead class', () => {
   let undead;
