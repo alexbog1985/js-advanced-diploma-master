@@ -73,7 +73,7 @@ export default class GameController {
     if (positionedCharacter) {
       const char = positionedCharacter.character;
       const tooltipContent =
-        `\u{1F396} ${ char.level } \u{2694} ${char.attack} \u{1F6E1} ${char.defense} \u{2764} ${char.health}`;
+        `\u{1F396}${ char.level } \u{2694}${char.attack} \u{1F6E1}${char.defense} \u{2764}${char.health}`;
       this.gamePlay.showCellTooltip(tooltipContent, index);
     }
   }
