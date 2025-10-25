@@ -7,6 +7,8 @@ import Swordsman from './characters/Swordsman';
 import Daemon from './characters/Daemon';
 import Undead from './characters/Undead';
 import Vampire from './characters/Vampire';
+import GamePlay from './GamePlay';
+import GameState from './GameState';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -17,7 +19,11 @@ export default class GameController {
     this.enemyTeam = [];
     this.currentLevel = 1;
 
+    this.currentTurn = 'player';
+    this.selectedCharacter = null;
+
     this.onCellEnter = this.onCellEnter.bind(this);
+    this.onCellClick = this.onCellClick.bind(this);
   }
 
   init() {
@@ -27,6 +33,7 @@ export default class GameController {
     this.redrawAllPositions();
 
     this.gamePlay.addCellEnterListener(this.onCellEnter);
+    this.gamePlay.addCellClickListener(this.onCellClick);
   }
 
   generateTeams() {
@@ -64,8 +71,54 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.allPositionedCharacters);
   }
 
+  getGameState() {
+    return {
+      currentTurn: this.currentTurn
+    };
+  }
+
+  loadGameState() {
+    const savedState = this.stateService.load();
+    const gameState = GameState.from(savedState);
+
+    if (gameState) {
+      this.currentTurn = gameState.currentTurn;
+    } else {
+      console.log('Начните новую игру');
+    }
+  }
+
+  saveGameState() {
+    const gameState = this.getGameState();
+    this.stateService.save(gameState);
+  }
+
   onCellClick(index) {
-    // TODO: react to click
+    if (this.currentTurn !== 'player') {
+      return;
+    }
+
+    const positionedCharacter = this.getCharacterAt(index);
+
+    if (!positionedCharacter) {
+      GamePlay.showError('Кликнул по пустой ячейке, Кликни по игроку своей команды!');
+      return;
+    }
+
+    if (this.enemyTeam.includes(positionedCharacter)) {
+      GamePlay.showError('Кликни по игроку своей команды!');
+      return;
+    }
+
+    if (this.selectedCharacter) {
+      this.gamePlay.deselectCell(this.selectedCharacter.position);
+    }
+
+    this.gamePlay.selectCell(index, 'yellow');
+    this.selectedCharacter = positionedCharacter;
+
+    // this.currentTurn = this.currentTurn === 'player' ? 'computer' : 'player';
+    // this.saveGameState(); // Сохраняем состояние после смены хода
   }
 
   onCellEnter(index) {
