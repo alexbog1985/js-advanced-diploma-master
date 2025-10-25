@@ -25,8 +25,8 @@ describe('Vampire class', () => {
   });
 
   test('должен иметь базовые характеристики атаки и защиты', () => {
-    expect(vampire.attack).toBe(10);
-    expect(vampire.defense).toBe(10);
+    expect(vampire.attack).toBe(25);
+    expect(vampire.defense).toBe(25);
   });
 
   test('должен иметь корректные значения по умолчанию для типа', () => {

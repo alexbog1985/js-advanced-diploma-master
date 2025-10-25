@@ -25,8 +25,8 @@ describe('Undead class', () => {
   });
 
   test('должен иметь базовые характеристики атаки и защиты', () => {
-    expect(undead.attack).toBe(25);
-    expect(undead.defense).toBe(25);
+    expect(undead.attack).toBe(40);
+    expect(undead.defense).toBe(10);
   });
 
   test('должен иметь корректные значения по умолчанию для типа', () => {
