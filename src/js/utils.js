@@ -2,7 +2,7 @@
  * @todo
  * @param index - индекс поля
  * @param boardSize - размер квадратного поля (в длину или ширину)
- * @returns строка - тип ячейки на поле:
+ * @returns string - тип ячейки на поле:
  *
  * top-left
  * top-right
@@ -35,8 +35,6 @@ export function calcTileType(index, boardSize) {
   if (col === 0) return 'left';
   if (col === boardSize - 1) return 'right';
   if (row > 0 && row < boardSize - 1 && col > 0 && col < boardSize - 1) return 'center';
-  // TODO: ваш код будет тут
-  // return 'center';
 }
 
 export function calcHealthLevel(health) {
