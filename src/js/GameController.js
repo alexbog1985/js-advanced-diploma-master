@@ -16,6 +16,8 @@ export default class GameController {
     this.playerTeam = [];
     this.enemyTeam = [];
     this.currentLevel = 1;
+
+    this.onCellEnter = this.onCellEnter.bind(this);
   }
 
   init() {
@@ -23,8 +25,8 @@ export default class GameController {
     this.gamePlay.drawUi(selectedTheme);
     this.generateTeams();
     this.redrawAllPositions();
-    // TODO: add event listeners to gamePlay events
-    // TODO: load saved stated from stateService
+
+    this.gamePlay.addCellEnterListener(this.onCellEnter);
   }
 
   generateTeams() {
@@ -67,10 +69,21 @@ export default class GameController {
   }
 
   onCellEnter(index) {
-    // TODO: react to mouse enter
+    const positionedCharacter = this.getCharacterAt(index);
+    if (positionedCharacter) {
+      const char = positionedCharacter.character;
+      const tooltipContent =
+        `\u{1F396} ${ char.level } \u{2694} ${char.attack} \u{1F6E1} ${char.defense} \u{2764} ${char.health}`;
+      this.gamePlay.showCellTooltip(tooltipContent, index);
+    }
   }
 
   onCellLeave(index) {
     // TODO: react to mouse leave
+  }
+
+  getCharacterAt(index) {
+    const allCharacters = [...this.playerTeam, ...this.enemyTeam];
+    return allCharacters.find(positionedChar => positionedChar.position === index);
   }
 }
