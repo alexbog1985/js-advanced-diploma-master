@@ -9,6 +9,7 @@ import Undead from './characters/Undead';
 import Vampire from './characters/Vampire';
 import GamePlay from './GamePlay';
 import GameState from './GameState';
+import cursors from "./cursors";
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -21,9 +22,12 @@ export default class GameController {
 
     this.currentTurn = 'player';
     this.selectedCharacter = null;
+    this.possibleMovies = [];
+    this.possibleAttacs = [];
 
     this.onCellEnter = this.onCellEnter.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
+    this.onCellLeave = this.onCellLeave.bind(this);
   }
 
   init() {
@@ -34,6 +38,7 @@ export default class GameController {
 
     this.gamePlay.addCellEnterListener(this.onCellEnter);
     this.gamePlay.addCellClickListener(this.onCellClick);
+    this.gamePlay.addCellLeaveListener(this.onCellLeave);
   }
 
   generateTeams() {
@@ -100,6 +105,10 @@ export default class GameController {
 
     const positionedCharacter = this.getCharacterAt(index);
 
+    if (positionedCharacter && this.playerTeam.includes(positionedCharacter)) {
+      console.log('персонаж выбран');
+    }
+
     if (!positionedCharacter) {
       GamePlay.showError('Кликнул по пустой ячейке, Кликни по игроку своей команды!');
       return;
@@ -128,15 +137,40 @@ export default class GameController {
       const tooltipContent =
         `\u{1F396}${ char.level } \u{2694}${char.attack} \u{1F6E1}${char.defense} \u{2764}${char.health}`;
       this.gamePlay.showCellTooltip(tooltipContent, index);
+      this.gamePlay.setCursor(cursors.pointer);
     }
   }
 
   onCellLeave(index) {
-    // TODO: react to mouse leave
+    if (!this.selectedCharacter || this.selectedCharacter.position !== index) {
+      this.gamePlay.deselectCell(index);
+    }
+    this.gamePlay.hideCellTooltip(index);
+    this.gamePlay.setCursor(cursors.auto);
   }
 
   getCharacterAt(index) {
     const allCharacters = [...this.playerTeam, ...this.enemyTeam];
     return allCharacters.find(positionedChar => positionedChar.position === index);
+  }
+
+  calculatePossibleMoves(position, moveRange) {
+    const moves = [];
+    const x0 = position % this.boardSize;
+    const y0 = Math.floor(position / this.boardSize);
+
+    for (let y = 0; y < this.boardSize; y++) {
+      for (let x = 0; x < this.boardSize; x++) {
+        const distance = Math.max(Math.abs(x - x0), Math.abs(y - y0));
+        if (distance <= moveRange && distance > 0) {
+          const index = y * this.boardSize + x;
+          // Проверяем, что клетка пустая
+          if (!this.getCharacterAt(index)) {
+            moves.push(index);
+          }
+        }
+      }
+    }
+    return moves;
   }
 }
