@@ -154,6 +154,20 @@ export default class GameController {
     return allCharacters.find(positionedChar => positionedChar.position === index);
   }
 
+  updatePossibleActions() {
+    if (!this.selectedCharacter) {
+      this.possibleMoves = [];
+      this.possibleAttacks = [];
+      return;
+    }
+
+    const moveRange = this.selectedCharacter.moveRange;
+    const attackRange = this.selectedCharacter.attackRange;
+
+    this.possibleMoves = this.calculatePossibleMoves(this.selectedCharacter.position, moveRange);
+    this.possibleAttacks = this.calculatePossibleAttacks(this.selectedCharacter.position, attackRange);
+  }
+
   calculatePossibleMoves(position, moveRange) {
     const moves = [];
     const x0 = position % this.boardSize;
@@ -172,5 +186,26 @@ export default class GameController {
       }
     }
     return moves;
+  }
+
+  calculatePossibleAttacks(position, attackRange) {
+    const attacks = [];
+    const x0 = position % this.boardSize;
+    const y0 = Math.floor(position / this.boardSize);
+
+    for (let y = 0; y < this.boardSize; y++) {
+      for (let x = 0; x < this.boardSize; x++) {
+        const distance = Math.max(Math.abs(x - x0), Math.abs(y - y0));
+        if (distance <= attackRange && distance > 0) {
+          const index = y * this.boardSize + x;
+          const character = this.getCharacterAt(index);
+          // Проверяем, что в клетке вражеский персонаж
+          if (character && !this.playerTeam.includes(character)) {
+            attacks.push(index);
+          }
+        }
+      }
+    }
+    return attacks;
   }
 }
