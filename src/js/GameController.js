@@ -22,7 +22,7 @@ export default class GameController {
 
     this.currentTurn = 'player';
     this.selectedCharacter = null;
-    this.possibleMovies = [];
+    this.possibleMoves = [];
     this.possibleAttacks = [];
 
     this.onCellEnter = this.onCellEnter.bind(this);
@@ -98,6 +98,55 @@ export default class GameController {
     this.stateService.save(gameState);
   }
 
+  switchTurn() {
+    this.currentTurn = this.currentTurn === 'player' ? 'player' : 'turn';
+    // this.saveGameState();
+    this.computerTurn();
+  }
+
+  computerTurn() {
+    console.log('Ход противника');
+
+    setTimeout(() => {
+      this.switchTurn();
+    },1000);
+  }
+
+  playerMove(index) {
+    const oldPosition = this.selectedCharacter.position;
+
+        this.selectedCharacter.position = index;
+        this.redrawAllPositions();
+
+        this.gamePlay.deselectCell(oldPosition);
+        this.gamePlay.deselectCell(index);
+
+        this.selectedCharacter = null;
+
+        this.clearHighlights();
+
+        this.switchTurn();
+        console.log(`Персонаж перемещен с ${oldPosition} на ${index}`);
+  }
+
+  playerAttack(index) {
+    console.log('Атакуем ', index);
+
+        this.gamePlay.deselectCell(this.selectedCharacter.position);
+        this.selectedCharacter = null;
+
+        this.clearHighlights();
+        this.switchTurn();
+  }
+
+  clearHighlights() {
+    for (let i = 0; i < this.boardSize * this.boardSize; i++) {
+      this.gamePlay.deselectCell(i);
+    }
+    this.possibleMoves = [];
+    this.possibleAttacks = [];
+  }
+
   onCellClick(index) {
     if (this.currentTurn !== 'player') {
       return;
@@ -112,13 +161,9 @@ export default class GameController {
       this.selectedCharacter = positionedCharacter;
       this.updatePossibleActions();
     } else if (this.possibleMoves.includes(index)) {
-      console.log('Переход на ', index);
-      this.gamePlay.deselectCell(this.selectedCharacter.position);
-      this.selectedCharacter = null;
+      this.playerMove(index);
     } else if (this.possibleAttacks.includes(index)) {
-      console.log('Атакуем ', index);
-      this.gamePlay.deselectCell(this.selectedCharacter.position);
-      this.selectedCharacter = null;
+      this.playerAttack(index);
     } else {
       GamePlay.showError('Недопустимое действие');
     }
