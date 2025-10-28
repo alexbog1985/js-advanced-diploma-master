@@ -23,7 +23,7 @@ export default class GameController {
     this.currentTurn = 'player';
     this.selectedCharacter = null;
     this.possibleMovies = [];
-    this.possibleAttacs = [];
+    this.possibleAttacks = [];
 
     this.onCellEnter = this.onCellEnter.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
@@ -104,27 +104,24 @@ export default class GameController {
     }
 
     const positionedCharacter = this.getCharacterAt(index);
+    this.updatePossibleActions();
 
     if (positionedCharacter && this.playerTeam.includes(positionedCharacter)) {
-      console.log('персонаж выбран');
-    }
-
-    if (!positionedCharacter) {
-      GamePlay.showError('Кликнул по пустой ячейке, Кликни по игроку своей команды!');
-      return;
-    }
-
-    if (this.enemyTeam.includes(positionedCharacter)) {
-      GamePlay.showError('Кликни по игроку своей команды!');
-      return;
-    }
-
-    if (this.selectedCharacter) {
+      if (this.selectedCharacter) this.gamePlay.deselectCell(this.selectedCharacter.position);
+      this.gamePlay.selectCell(index, 'yellow');
+      this.selectedCharacter = positionedCharacter;
+      this.updatePossibleActions();
+    } else if (this.possibleMoves.includes(index)) {
+      console.log('Переход на ', index);
       this.gamePlay.deselectCell(this.selectedCharacter.position);
+      this.selectedCharacter = null;
+    } else if (this.possibleAttacks.includes(index)) {
+      console.log('Атакуем ', index);
+      this.gamePlay.deselectCell(this.selectedCharacter.position);
+      this.selectedCharacter = null;
+    } else {
+      GamePlay.showError('Недопустимое действие');
     }
-
-    this.gamePlay.selectCell(index, 'yellow');
-    this.selectedCharacter = positionedCharacter;
 
     // this.currentTurn = this.currentTurn === 'player' ? 'computer' : 'player';
     // this.saveGameState(); // Сохраняем состояние после смены хода
@@ -132,12 +129,32 @@ export default class GameController {
 
   onCellEnter(index) {
     const positionedCharacter = this.getCharacterAt(index);
+
     if (positionedCharacter) {
       const char = positionedCharacter.character;
       const tooltipContent =
-        `\u{1F396}${ char.level } \u{2694}${char.attack} \u{1F6E1}${char.defense} \u{2764}${char.health}`;
+        `\u{1F396}${char.level} \u{2694}${char.attack} \u{1F6E1}${char.defense} \u{2764}${char.health}`;
       this.gamePlay.showCellTooltip(tooltipContent, index);
-      this.gamePlay.setCursor(cursors.pointer);
+    }
+
+    if (this.playerTeam.includes(positionedCharacter)) {
+      this.gamePlay.setCursor(cursors.pointer)
+    } else {this.gamePlay.setCursor(cursors.notallowed)}
+
+    if (this.selectedCharacter) {
+      this.updatePossibleActions();
+
+      if (positionedCharacter && this.playerTeam.includes(positionedCharacter)) {
+        this.gamePlay.setCursor(cursors.pointer);
+      } else if (this.possibleMoves.includes(index)) {
+        this.gamePlay.setCursor(cursors.pointer);
+        this.gamePlay.selectCell(index, 'green');
+      } else if (this.possibleAttacks.includes(index)) {
+        this.gamePlay.setCursor(cursors.crosshair);
+        this.gamePlay.selectCell(index, 'red');
+      } else {
+        this.gamePlay.setCursor(cursors.notallowed);
+      }
     }
   }
 
@@ -161,8 +178,8 @@ export default class GameController {
       return;
     }
 
-    const moveRange = this.selectedCharacter.moveRange;
-    const attackRange = this.selectedCharacter.attackRange;
+    const moveRange = this.selectedCharacter.character.moveRange;
+    const attackRange = this.selectedCharacter.character.attackRange;
 
     this.possibleMoves = this.calculatePossibleMoves(this.selectedCharacter.position, moveRange);
     this.possibleAttacks = this.calculatePossibleAttacks(this.selectedCharacter.position, attackRange);
@@ -173,18 +190,36 @@ export default class GameController {
     const x0 = position % this.boardSize;
     const y0 = Math.floor(position / this.boardSize);
 
-    for (let y = 0; y < this.boardSize; y++) {
-      for (let x = 0; x < this.boardSize; x++) {
-        const distance = Math.max(Math.abs(x - x0), Math.abs(y - y0));
-        if (distance <= moveRange && distance > 0) {
+    // Все возможные направления: горизонталь, вертикаль, диагонали
+    const directions = [
+      [-1, -1], [-1, 0], [-1, 1],  // влево-вверх, вверх, вправо-вверх
+      [0, -1],           [0, 1],   // влево, ______, вправо
+      [1, -1],  [1, 0],  [1, 1]    // влево-вниз, вниз, вправо-вниз
+    ];
+
+    for (const [dx, dy] of directions) {
+      for (let step = 1; step <= moveRange; step++) {
+        const x = x0 + dx * step;
+        const y = y0 + dy * step;
+
+        // Проверяем, что координаты в пределах доски
+        if (x >= 0 && x < this.boardSize && y >= 0 && y < this.boardSize) {
           const index = y * this.boardSize + x;
+
           // Проверяем, что клетка пустая
           if (!this.getCharacterAt(index)) {
             moves.push(index);
+          } else {
+            // Если на пути препятствие, прекращаем движение в этом направлении
+            break;
           }
+        } else {
+          // Выход за границы доски - прекращаем движение в этом направлении
+          break;
         }
       }
     }
+
     return moves;
   }
 
