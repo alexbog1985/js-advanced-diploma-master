@@ -99,9 +99,11 @@ export default class GameController {
   }
 
   switchTurn() {
-    this.currentTurn = this.currentTurn === 'player' ? 'player' : 'turn';
-    // this.saveGameState();
-    this.computerTurn();
+    this.currentTurn = this.currentTurn === 'player' ? 'computer' : 'player';
+    this.saveGameState();
+    if (this.currentTurn === 'computer') {
+      this.computerTurn();
+    }
   }
 
   computerTurn() {
@@ -129,8 +131,27 @@ export default class GameController {
         console.log(`Персонаж перемещен с ${oldPosition} на ${index}`);
   }
 
-  playerAttack(index) {
+  async playerAttack(index) {
     console.log('Атакуем ', index);
+
+    const targetCharacter = this.getCharacterAt(index);
+
+    if (targetCharacter && this.enemyTeam.includes(targetCharacter)) {
+      const damage = Math.max(
+        this.selectedCharacter.character.attack - targetCharacter.character.defence,
+        this.selectedCharacter.character.attack * 0.1
+      );
+
+      await this.gamePlay.showDamage(index, damage);
+      targetCharacter.character.health -= damage;
+
+        if (targetCharacter.character.health <= 0) {
+          this.enemyTeam = this.enemyTeam.filter(char => char !== targetCharacter);
+      }
+
+      this.redrawAllPositions();
+      console.log(`Атака нанесла ${damage} урона`);
+    }
 
         this.gamePlay.deselectCell(this.selectedCharacter.position);
         this.selectedCharacter = null;
