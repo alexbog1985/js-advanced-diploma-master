@@ -20,6 +20,8 @@ export default class GameController {
     this.enemyTeam = [];
     this.currentLevel = 1;
 
+    this. themeOrder = [themes.prairie, themes.desert, themes.arctic, themes.mountain];
+
     this.currentTurn = 'player';
     this.selectedCharacter = null;
     this.possibleMoves = [];
@@ -31,14 +33,19 @@ export default class GameController {
   }
 
   init() {
-    const selectedTheme = themes.prairie;
-    this.gamePlay.drawUi(selectedTheme);
+    const theme = this.getCurrentTheme();
+    this.gamePlay.drawUi(theme);
     this.generateTeams();
     this.redrawAllPositions();
 
     this.gamePlay.addCellEnterListener(this.onCellEnter);
     this.gamePlay.addCellClickListener(this.onCellClick);
     this.gamePlay.addCellLeaveListener(this.onCellLeave);
+  }
+
+  getCurrentTheme() {
+    const themeIndex = Math.min(this.currentLevel - 1, this.themeOrder.length - 1);
+    return themes[themeIndex];
   }
 
   generateTeams() {
@@ -48,6 +55,9 @@ export default class GameController {
     const playerCharacters = generateTeam(playerTypes, this.currentLevel, 2);
     const playerPositions = this.generatePositions([0, 1], playerCharacters.characters.length);
     this.playerTeam = playerCharacters.characters.map((character, index) => {
+      while (character.level < this.currentLevel) {
+        this.levelupCharacter(character);
+      }
       return new PositionedCharacter(character, playerPositions[index]);
     });
 
@@ -74,6 +84,12 @@ export default class GameController {
   redrawAllPositions() {
     const allPositionedCharacters = [...this.playerTeam, ...this.enemyTeam];
     this.gamePlay.redrawPositions(allPositionedCharacters);
+  }
+
+  levelUpCharacter(character) {
+    const currentHealth = character.health;
+    character.level += 1;
+    character.health = Math.min(character.health + 80, 100);
   }
 
   getGameState() {
