@@ -102,16 +102,129 @@ export default class GameController {
     this.currentTurn = this.currentTurn === 'player' ? 'computer' : 'player';
     this.saveGameState();
     if (this.currentTurn === 'computer') {
-      this.computerTurn();
+      this.computerTurn().then();
     }
   }
 
-  computerTurn() {
+  findBestAttackTarget() {
+    let bestTarget = null;
+    let lowestHealth = Infinity;
+
+    for (const attackIndex of this.possibleAttacks) {
+      const target = this.getCharacterAt(attackIndex);
+      if (target && target.character.health) {
+        lowestHealth = target.character.health;
+        bestTarget = attackIndex;
+      }
+    }
+    return bestTarget;
+  }
+
+  findBestMovePosition(enemy) {
+    const nearestPlayer = this.findNearestPlayer(enemy.position)
+    if (!nearestPlayer) return null;
+
+    let bestMove = null;
+    let shortestDistance = Infinity;
+
+    for (const moveIndex of this.possibleMoves) {
+      const distance = this.calculateDistance(moveIndex, nearestPlayer.position);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        bestMove = moveIndex;
+      }
+    }
+    return bestMove;
+  }
+
+  findNearestPlayer(enemyPosition) {
+    let nearestPlayer = null;
+    let shortestDistance = Infinity;
+
+    for (const player of this.playerTeam) {
+      const distance = this.calculateDistance(enemyPosition, player.position);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        nearestPlayer = player;
+      }
+    }
+
+    return nearestPlayer;
+  }
+
+  calculateDistance(pos1, pos2) {
+    const x1 = pos1 % this.boardSize;
+    const y1 = Math.floor(pos1 / this.boardSize);
+    const x2 = pos2 % this.boardSize;
+    const y2 = Math.floor(pos2 / this.boardSize);
+
+    return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
+  }
+
+  async computerAttack(index) {
+    const targetCharacter = this.getCharacterAt(index);
+
+    if (targetCharacter && this.playerTeam.includes(targetCharacter)) {
+      const damage = Math.max(
+        this.selectedCharacter.character.attack - targetCharacter.character.defence,
+        this.selectedCharacter.character.attack * 0.1
+      );
+
+      await this.gamePlay.showDamage(index, damage);
+
+      targetCharacter.character.health -= damage;
+
+      if (targetCharacter.character.health <= 0) {
+        this.playerTeam = this.playerTeam.filter(char => char !== targetCharacter);
+      }
+
+      this.redrawAllPositions();
+      console.log(`Компьютер атаковал и нанес ${damage} урона`)
+    }
+  }
+
+  computerMove(index) {
+    const oldPosition = this.selectedCharacter.position;
+
+    this.selectedCharacter.position = index;
+    this.redrawAllPositions();
+    console.log(`Компьютер переместил персонажа с ${oldPosition} на ${index}`)
+  }
+
+  async computerTurn() {
     console.log('Ход противника');
 
-    setTimeout(() => {
+    let actionPerformed = false;
+    const shuffledEnemyTeam = [...this.enemyTeam].sort(() => Math.random() - 0.5);
+    for (const enemy of shuffledEnemyTeam) {
+      this.selectedCharacter = enemy;
+      this.updatePossibleActions();
+
+      if (this.possibleAttacks.length > 0) {
+        const attackTarget = this.findBestAttackTarget();
+        if (attackTarget) {
+          await this.computerAttack(attackTarget);
+          actionPerformed = true;
+          break;
+        }
+      }
+      if (this.possibleMoves.length > 0) {
+        const movePosition = this.findBestMovePosition(enemy);
+        if (movePosition) {
+          this.computerMove(movePosition);
+          actionPerformed = true;
+          break;
+        }
+      }
+    }
+    this.selectedCharacter = null;
+    this.clearHighlights();
+
+    if (actionPerformed) {
       this.switchTurn();
-    },1000);
+    } else {
+      this.switchTurn();
+    }
   }
 
   playerMove(index) {
@@ -184,7 +297,7 @@ export default class GameController {
     } else if (this.possibleMoves.includes(index)) {
       this.playerMove(index);
     } else if (this.possibleAttacks.includes(index)) {
-      this.playerAttack(index);
+      this.playerAttack(index).then();
     } else {
       GamePlay.showError('Недопустимое действие');
     }
