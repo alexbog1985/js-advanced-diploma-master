@@ -72,8 +72,8 @@ export default class GameController {
   }
 
   redrawAllPositions() {
-    this.allPositionedCharacters = [...this.playerTeam, ...this.enemyTeam];
-    this.gamePlay.redrawPositions(this.allPositionedCharacters);
+    const allPositionedCharacters = [...this.playerTeam, ...this.enemyTeam];
+    this.gamePlay.redrawPositions(allPositionedCharacters);
   }
 
   getGameState() {
@@ -112,7 +112,7 @@ export default class GameController {
 
     for (const attackIndex of this.possibleAttacks) {
       const target = this.getCharacterAt(attackIndex);
-      if (target && target.character.health) {
+      if (target && target.character.health < lowestHealth) {
         lowestHealth = target.character.health;
         bestTarget = attackIndex;
       }
@@ -121,7 +121,7 @@ export default class GameController {
   }
 
   findBestMovePosition(enemy) {
-    const nearestPlayer = this.findNearestPlayer(enemy.position)
+    const nearestPlayer = this.findNearestPlayer(enemy.position);
     if (!nearestPlayer) return null;
 
     let bestMove = null;
@@ -179,7 +179,7 @@ export default class GameController {
       }
 
       this.redrawAllPositions();
-      console.log(`Компьютер атаковал и нанес ${damage} урона`)
+      console.log(`Компьютер атаковал и нанес ${damage} урона`);
     }
   }
 
@@ -188,7 +188,7 @@ export default class GameController {
 
     this.selectedCharacter.position = index;
     this.redrawAllPositions();
-    console.log(`Компьютер переместил персонажа с ${oldPosition} на ${index}`)
+    console.log(`Компьютер переместил персонажа с ${oldPosition} на ${index}`);
   }
 
   async computerTurn() {
@@ -196,6 +196,7 @@ export default class GameController {
 
     let actionPerformed = false;
     const shuffledEnemyTeam = [...this.enemyTeam].sort(() => Math.random() - 0.5);
+
     for (const enemy of shuffledEnemyTeam) {
       this.selectedCharacter = enemy;
       this.updatePossibleActions();
@@ -302,8 +303,6 @@ export default class GameController {
       GamePlay.showError('Недопустимое действие');
     }
 
-    // this.currentTurn = this.currentTurn === 'player' ? 'computer' : 'player';
-    // this.saveGameState(); // Сохраняем состояние после смены хода
   }
 
   onCellEnter(index) {
@@ -408,12 +407,20 @@ export default class GameController {
         if (distance <= attackRange && distance > 0) {
           const index = y * this.boardSize + x;
           const character = this.getCharacterAt(index);
-          if (character && !this.playerTeam.includes(character)) {
-            attacks.push(index);
+          if (this.currentTurn === 'player') {
+            if (character && this.enemyTeam.includes(character)) {
+              attacks.push(index);
+            }
+          } else {
+            if (character && this.playerTeam.includes(character)) {
+              attacks.push(index);
+            }
           }
         }
       }
     }
+
+    console.log(`Возможных атак ${attacks.length}`);
     return attacks;
   }
 }
