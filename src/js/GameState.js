@@ -1,10 +1,10 @@
-import PositionedCharacter from "./PositionedCharacter";
-import Bowman from "./characters/Bowman";
-import Magician from "./characters/Magician";
-import Swordsman from "./characters/Swordsman";
-import Daemon from "./characters/Daemon";
-import Undead from "./characters/Undead";
-import Vampire from "./characters/Vampire";
+import PositionedCharacter from './PositionedCharacter';
+import Bowman from './characters/Bowman';
+import Magician from './characters/Magician';
+import Swordsman from './characters/Swordsman';
+import Daemon from './characters/Daemon';
+import Undead from './characters/Undead';
+import Vampire from './characters/Vampire';
 
 const CHARACTER_CLASSES = {
   'bowman': Bowman,
@@ -13,7 +13,7 @@ const CHARACTER_CLASSES = {
   'daemon': Daemon,
   'undead': Undead,
   'vampire': Vampire,
-}
+};
 
 export default class GameState {
   static from(object) {

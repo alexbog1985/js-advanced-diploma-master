@@ -37,7 +37,7 @@ export default class GameController {
   }
 
   init() {
-    this.loadGameState()
+    this.loadGameState();
 
     const theme = this.getCurrentTheme();
     this.gamePlay.drawUi(theme);
@@ -114,7 +114,7 @@ export default class GameController {
       character.attack,
       Math.floor(character.attack * improvementRatio)
     );
-    console.log('защита', character.defence)
+    console.log('защита', character.defence);
     character.defence = Math.max(
       character.defence,
       Math.floor(character.defence * improvementRatio)
@@ -555,7 +555,7 @@ export default class GameController {
 
   finishGame(message) {
     this.gameOver = true;
-    GamePlay.showMessage(message)
+    GamePlay.showMessage(message);
     this.saveGameState();
   }
 
