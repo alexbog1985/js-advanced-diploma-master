@@ -1,4 +1,5 @@
 import { calcTileType } from '../utils';
+import { calcHealthLevel } from '../utils';
 
 describe('calcTileType', () => {
   test.each([
@@ -39,4 +40,22 @@ describe('calcTileType', () => {
       expect(calcTileType(index, boardSize)).toBe(expected);
     }
   );
+
+  describe('calcHealthLevel', () => {
+    const testCases = [
+      { health: 10, expected: 'critical' },
+      { health: 14, expected: 'critical' },
+      { health: 15, expected: 'normal' },
+      { health: 49, expected: 'normal' },
+      { health: 50, expected: 'high' },
+      { health: 100, expected: 'high' },
+    ];
+
+    test.each(testCases)(
+      'для здоровья $health должен возвращать $expected',
+      ({ health, expected }) => {
+        expect(calcHealthLevel(health)).toBe(expected);
+      }
+    );
+  });
 });
