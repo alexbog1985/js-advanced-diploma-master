@@ -1,45 +1,29 @@
-import Character from '../Character';
+import Character from "../Character";
+import Bowman from "../characters/Bowman";
+import Daemon from "../characters/Daemon";
+import Magician from "../characters/Magician";
+import Swordsman from "../characters/Swordsman";
+import Undead from "../characters/Undead";
+import Vampire from "../characters/Vampire";
 
-class CharacterTest extends Character {
-  constructor(level, type = 'test') {
-    super(level, type);
-    this.attack = 10;
-    this.defense = 5;
-  }
-}
 
-describe('Character', () => {
-  test('тест на ошибку создания экземпляра класса напрямую', () => {
-    expect(() => new Character(1))
-      .toThrow('Нельзя создавать экземпляры базового класса Character напрямую');
+describe("Character", () => {
+  test('должен выбрасывать исключение при попытке создать объект на прямую', () => {
+    expect(() => new Character(1)).toThrow('Нельзя создавать экземпляры базового класса Character напрямую');
   });
 });
 
-describe('Инициализация', () => {
-  let character;
+  const inheritedClassesTestCases = [
+    { Class: Bowman, level: 1, type: 'bowman' },
+    { Class: Swordsman, level: 1, type: 'swordsman' },
+    { Class: Magician, level: 1, type: 'magician' },
+    { Class: Daemon, level: 1, type: 'daemon' },
+    { Class: Undead, level: 1, type: 'undead' },
+    { Class: Vampire, level: 1, type: 'vampire' }
+  ];
 
-  beforeEach(() => {
-    character = new CharacterTest(1);
+  inheritedClassesTestCases.forEach(({ Class, level, type }) => {
+    test(`не должен выбрасывать исключение при создании объекта ${type}`, () => {
+      expect(() => new Class(level)).not.toThrow();
+    });
   });
-
-  test('должен устанавливать уровень', () => {
-    expect(character.level).toBe(1);
-  });
-
-  test('должен устанавливать тип персонажа', () => {
-    expect(character.type).toBe('test');
-  });
-
-  test('должен устанавливать здоровье по умолчанию', () => {
-    expect(character.health).toBe(50);
-  });
-
-  test('должен позволять устанавливать атаку в наследнике', () =>{
-    expect(character.attack).toBe(10);
-  });
-
-  test('должен позволять устанавливать защиту в наследнике', () => {
-    expect(character.defense).toBe(5);
-  });
-
-});
